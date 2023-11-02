@@ -1,3 +1,6 @@
 # tones2notes
 
-CS337 AI-ML Course Project
+### Dataset
+
+Currently using the Nottingham music dataset. Refer to [this](https://github.com/jukedeck/nottingham-dataset/) repository for its usage
+

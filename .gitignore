@@ -9,6 +9,9 @@ ENSTDkCl/
 ENSTDkAm/
 SptkBGAm/
 StbgTGd2/
+SptkBGCl/
+*.h5
 __pycache__/
 *_feature/
+tensorboard/
 

@@ -9,6 +9,12 @@ import numpy as np
 import pretty_midi
 from tqdm import trange
 from scipy import signal, fftpack
+import h5py
+import soundfile as sf
+
+from keras.models import load_model
+import concurrent.futures
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 from src.config import HarmonicNum
 
@@ -46,7 +52,7 @@ def STFT(x, fr, fs, Hop, h):
     window_size = len(h)
     f = fs*np.linspace(0, 0.5, np.round(N/2).astype('int'), endpoint=True)
     Lh = int(np.floor(float(window_size-1) / 2))
-    tfr = np.zeros((int(N), len(t)), dtype=np.float)     
+    tfr = np.zeros((int(N), len(t)), dtype=float)     
         
     for icol in range(0, len(t)):
         ti = int(t[icol])           
@@ -86,7 +92,7 @@ def Freq2LogFreqMapping(tfr, f, fr, fc, tc, NumPerOct):
             break
 
     Nest = len(central_freq)
-    freq_band_transformation = np.zeros((Nest-1, len(f)), dtype=np.float)
+    freq_band_transformation = np.zeros((Nest-1, len(f)), dtype=float)
     for i in range(1, Nest-1):
         l = int(round(central_freq[i-1]/fr))
         r = int(round(central_freq[i+1]/fr)+1)
@@ -116,7 +122,7 @@ def Quef2LogFreqMapping(ceps, q, fs, fc, tc, NumPerOct):
             break
     f = 1/(q+1e-9)
     Nest = len(central_freq)
-    freq_band_transformation = np.zeros((Nest-1, len(f)), dtype=np.float)
+    freq_band_transformation = np.zeros((Nest-1, len(f)), dtype=float)
     for i in range(1, Nest-1):
         for j in range(int(round(fs/central_freq[i+1])), int(round(fs/central_freq[i-1])+1)):
             if f[j] > central_freq[i-1] and f[j] < central_freq[i]:
@@ -342,7 +348,7 @@ class BaseFeatureExt:
 
                 # Process audio features
                 process_feature_song_list(sub_name, wav_paths, harmonic=self.harmonic, num_harmonic=HarmonicNum)
-
+        
                 # Process labels
                 self.process_labels(sub_name, label_paths)
                 
@@ -361,7 +367,6 @@ class BaseFeatureExt:
         all_wavs = []
         for path in self.wav_path:
             all_wavs += glob.glob(os.path.join(path, "*.wav"))
-
         # Parse label files
         name_path_map = {}
         for path in self.label_path:

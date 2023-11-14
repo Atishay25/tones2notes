@@ -1,18 +1,21 @@
 import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
-#os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
-
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+#os.environ["CUDA_VISIBLE_DEVICES"]="4"
 import json
 
 import argparse
 import tensorflow as tf
-#gpus = tf.config.list_physical_devices('GPU')
+#from tensorflow.python.client import device_lib
+#print(device_lib.list_local_devices())
+gpus = tf.config.list_physical_devices('GPU')
 #gpus = tf.config.get_visible_devices('GPU')
-#print(gpus)
-#if gpus:
-#    for gpu in gpus:
-#        # Set memory growth for each GPU
-#        tf.config.experimental.set_memory_growth(gpu, True)
+print(gpus)
+if gpus:
+    for gpu in gpus:
+        # Set memory growth for each GPU
+        tf.config.experimental.set_memory_growth(gpu, True)
+    #tf.config.experimental.set_memory_growth(gpus[3], True)
 from keras import callbacks
 #from tensorflow.python.keras.utils.multi_gpu_utils import multi_gpu_model
 

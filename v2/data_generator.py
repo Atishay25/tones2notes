@@ -6,16 +6,14 @@ import csv
 import time
 import collections
 import librosa
-import sox
 import logging
 
-from utilities import (create_folder, int16_to_float32, traverse_folder, 
-    pad_truncate_sequence, TargetProcessor, write_events_to_midi, 
+from utils import (traverse_folder, TargetProcessor, write_events_to_midi, 
     plot_waveform_midi_targets)
 import config
 
 
-class MaestroDataset(object):
+class MapsDataset(object):
     def __init__(self, hdf5s_dir, segment_seconds, frames_per_second, 
         max_note_shift=0, augmentor=None):
         """This class takes the meta of an audio segment as input, and return 
@@ -39,7 +37,7 @@ class MaestroDataset(object):
         self.segment_samples = int(self.sample_rate * self.segment_seconds)
         self.augmentor = augmentor
 
-        self.random_state = np.random.RandomState(1234)
+        self.random_state = np.random.RandomState(42)
 
         self.target_processor = TargetProcessor(self.segment_seconds, 
             self.frames_per_second, self.begin_note, self.classes_num)
@@ -69,8 +67,9 @@ class MaestroDataset(object):
             'reg_pedal_offset_roll': (frames_num,), 
             'pedal_frame_roll': (frames_num,)}
         """
-        [hdf5_name, start_time] = meta
-        hdf5_path = os.path.join(self.hdf5s_dir, hdf5_name)
+        hdf5_name = meta['hdf5_name']
+        start_time = meta['start_time']
+        hdf5_path = os.path.join(self.hdf5s_dir,'maps', hdf5_name)
          
         data_dict = {}
 
@@ -86,10 +85,10 @@ class MaestroDataset(object):
                 start_sample -= self.segment_samples
                 end_sample -= self.segment_samples
 
-            waveform = int16_to_float32(hf['waveform'][start_sample : end_sample])
+            waveform = ((hf['waveform'][start_sample : end_sample])/32767.).astype(np.float32)
 
-            if self.augmentor:
-                waveform = self.augmentor.augment(waveform)
+            #if self.augmentor:
+            #    waveform = self.augmentor.augment(waveform)
 
             if note_shift != 0:
                 """Augment pitch"""
@@ -102,7 +101,7 @@ class MaestroDataset(object):
             midi_events_time = hf['midi_event_time'][:]
 
             # Process MIDI events to target
-            (target_dict, note_events, pedal_events) = \
+            (target_dict, note_events) = \
                 self.target_processor.process(start_time, midi_events_time, 
                     midi_events, extend_pedal=False, note_shift=note_shift)
 
@@ -116,44 +115,6 @@ class MaestroDataset(object):
             exit()
 
         return data_dict
-
-
-class Augmentor(object):
-    def __init__(self):
-        """Data augmentor."""
-        
-        self.sample_rate = config.sample_rate
-        self.random_state = np.random.RandomState(1234)
-
-    def augment(self, x):
-        clip_samples = len(x)
-
-        logger = logging.getLogger('sox')
-        logger.propagate = False
-
-        tfm = sox.Transformer()
-        tfm.set_globals(verbosity=0)
-
-        tfm.pitch(self.random_state.uniform(-0.1, 0.1, 1)[0])
-        tfm.contrast(self.random_state.uniform(0, 100, 1)[0])
-
-        tfm.equalizer(frequency=self.loguniform(32, 4096, 1)[0], 
-            width_q=self.random_state.uniform(1, 2, 1)[0], 
-            gain_db=self.random_state.uniform(-30, 10, 1)[0])
-
-        tfm.equalizer(frequency=self.loguniform(32, 4096, 1)[0], 
-            width_q=self.random_state.uniform(1, 2, 1)[0], 
-            gain_db=self.random_state.uniform(-30, 10, 1)[0])
-        
-        tfm.reverb(reverberance=self.random_state.uniform(0, 70, 1)[0])
-
-        aug_x = tfm.build_array(input_array=x, sample_rate_in=self.sample_rate)
-        aug_x = pad_truncate_sequence(aug_x, clip_samples)
-        
-        return aug_x
-
-    def loguniform(self, low, high, size):
-        return np.exp(self.random_state.uniform(np.log(low), np.log(high), size))
 
 
 class Sampler(object):

@@ -67,9 +67,10 @@ class MapsDataset(object):
             'reg_pedal_offset_roll': (frames_num,), 
             'pedal_frame_roll': (frames_num,)}
         """
-        hdf5_name = meta['hdf5_name']
-        start_time = meta['start_time']
-        hdf5_path = os.path.join(self.hdf5s_dir,'maps', hdf5_name)
+        #print(meta)
+        hdf5_name = meta[0]
+        start_time = meta[1]
+        hdf5_path = os.path.join(self.hdf5s_dir,hdf5_name)
          
         data_dict = {}
 

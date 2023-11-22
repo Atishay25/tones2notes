@@ -16,6 +16,12 @@ def create_folder(fd):
     if not os.path.exists(fd):
         os.makedirs(fd)
 
+def get_filename(path):
+    path = os.path.realpath(path)
+    na_ext = path.split('/')[-1]
+    na = os.path.splitext(na_ext)[0]
+    return na
+
 def read_maps_midi(midi_path):
     midi_file = MidiFile(midi_path)
     ticks_per_beat = midi_file.ticks_per_beat
@@ -309,3 +315,37 @@ def plot_waveform_midi_targets(data_dict, start_time, note_events):
     plt.savefig(fig_path)
 
     print('Write out to {}, {}, {}!'.format(audio_path, midi_path, fig_path))
+
+class StatisticsContainer(object):
+    def __init__(self, statistics_path):
+        """Contain statistics of different training iterations.
+        """
+        self.statistics_path = statistics_path
+
+        self.backup_statistics_path = '{}_{}.pkl'.format(
+            os.path.splitext(self.statistics_path)[0], 
+            datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+
+        self.statistics_dict = {'train': [], 'validation': [], 'test': []}
+
+    def append(self, iteration, statistics, data_type):
+        statistics['iteration'] = iteration
+        self.statistics_dict[data_type].append(statistics)
+        
+    def dump(self):
+        pickle.dump(self.statistics_dict, open(self.statistics_path, 'wb'))
+        pickle.dump(self.statistics_dict, open(self.backup_statistics_path, 'wb'))
+        logging.info('    Dump statistics to {}'.format(self.statistics_path))
+        logging.info('    Dump statistics to {}'.format(self.backup_statistics_path))
+        
+    def load_state_dict(self, resume_iteration):
+        self.statistics_dict = pickle.load(open(self.statistics_path, 'rb'))
+
+        resume_statistics_dict = {'train': [], 'validation': [], 'test': []}
+        
+        for key in self.statistics_dict.keys():
+            for statistics in self.statistics_dict[key]:
+                if statistics['iteration'] <= resume_iteration:
+                    resume_statistics_dict[key].append(statistics)
+                
+        self.statistics_dict = resume_statistics_dict

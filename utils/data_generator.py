@@ -102,9 +102,7 @@ class MapsDataset(object):
             midi_events_time = hf['midi_event_time'][:]
 
             # Process MIDI events to target
-            (target_dict, note_events) = \
-                self.target_processor.process(start_time, midi_events_time, 
-                    midi_events, extend_pedal=False, note_shift=note_shift)
+            (target_dict, note_events) = self.target_processor.process(start_time, midi_events_time, midi_events, extend_pedal=False, note_shift=note_shift)
 
         # Combine input and target
         for key in target_dict.keys():
@@ -161,8 +159,6 @@ class Sampler(object):
          ['2004', 'MIDI-Unprocessed_SMF_22_R1_2004_01-04_ORIG_MID--AUDIO_22_R1_2004_17_Track17_wav.h5', 2.0]
          ...]"""
 
-        logging.info('{} segments: {}'.format(split, len(self.segment_list)))
-
         self.pointer = 0
         self.segment_indexes = np.arange(len(self.segment_list))
         self.random_state.shuffle(self.segment_indexes)
@@ -185,7 +181,7 @@ class Sampler(object):
             yield batch_segment_list
 
     def __len__(self):
-        return -1
+        return len(self.segment_list)
         
     def state_dict(self):
         state = {

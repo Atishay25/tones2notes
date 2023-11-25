@@ -10,7 +10,9 @@ import csv
 import datetime
 import collections
 import pickle
+import config
 from mido import MidiFile
+import soundfile as sf
 
 def create_folder(fd):
     if not os.path.exists(fd):
@@ -180,7 +182,7 @@ class TargetProcessor(object):
 
         return output
     
-def write_events_to_midi(start_time, note_events, pedal_events, midi_path):
+def write_events_to_midi(start_time, note_events, midi_path, pedal_events=False):
     """Write out note events to MIDI file.
 
     Args:
@@ -278,14 +280,15 @@ def plot_waveform_midi_targets(data_dict, start_time, note_events):
     create_folder('debug')
     audio_path = 'debug/debug.wav'
     midi_path = 'debug/debug.mid'
-    fig_path = 'debug/debug.pdf'
+    fig_path = 'debug/debug.png'
 
-    librosa.output.write_wav(audio_path, data_dict['waveform'], sr=config.sample_rate)
+    #librosa.output.write_wav(audio_path, data_dict['waveform'], sr=config.sample_rate)
+    sf.write('stereo_file1.wav', data_dict['waveform'], samplerate=config.sample_rate)
     write_events_to_midi(start_time, note_events, midi_path)
     x = librosa.core.stft(y=data_dict['waveform'], n_fft=2048, hop_length=160, window='hann', center=True)
     x = np.abs(x) ** 2
 
-    fig, axs = plt.subplots(11, 1, sharex=True, figsize=(30, 30))
+    fig, axs = plt.subplots(8, 1, sharex=True, figsize=(30, 30))
     fontsize = 20
     axs[0].matshow(np.log(x), origin='lower', aspect='auto', cmap='jet')
     axs[1].matshow(data_dict['onset_roll'].T, origin='lower', aspect='auto', cmap='jet')
@@ -295,9 +298,9 @@ def plot_waveform_midi_targets(data_dict, start_time, note_events):
     axs[5].matshow(data_dict['frame_roll'].T, origin='lower', aspect='auto', cmap='jet')
     axs[6].matshow(data_dict['velocity_roll'].T, origin='lower', aspect='auto', cmap='jet')
     axs[7].matshow(data_dict['mask_roll'].T, origin='lower', aspect='auto', cmap='jet')
-    axs[8].matshow(data_dict['reg_pedal_onset_roll'][:, None].T, origin='lower', aspect='auto', cmap='jet')
-    axs[9].matshow(data_dict['reg_pedal_offset_roll'][:, None].T, origin='lower', aspect='auto', cmap='jet')
-    axs[10].matshow(data_dict['pedal_frame_roll'][:, None].T, origin='lower', aspect='auto', cmap='jet')
+    #axs[8].matshow(data_dict['reg_pedal_onset_roll'][:, None].T, origin='lower', aspect='auto', cmap='jet')
+    #axs[9].matshow(data_dict['reg_pedal_offset_roll'][:, None].T, origin='lower', aspect='auto', cmap='jet')
+    #axs[10].matshow(data_dict['pedal_frame_roll'][:, None].T, origin='lower', aspect='auto', cmap='jet')
     axs[0].set_title('Log spectrogram', fontsize=fontsize)
     axs[1].set_title('onset_roll', fontsize=fontsize)
     axs[2].set_title('offset_roll', fontsize=fontsize)
@@ -306,13 +309,13 @@ def plot_waveform_midi_targets(data_dict, start_time, note_events):
     axs[5].set_title('frame_roll', fontsize=fontsize)
     axs[6].set_title('velocity_roll', fontsize=fontsize)
     axs[7].set_title('mask_roll', fontsize=fontsize)
-    axs[8].set_title('reg_pedal_onset_roll', fontsize=fontsize)
-    axs[9].set_title('reg_pedal_offset_roll', fontsize=fontsize)
-    axs[10].set_title('pedal_frame_roll', fontsize=fontsize)
-    axs[10].set_xlabel('frames')
-    axs[10].xaxis.set_label_position('bottom')
-    axs[10].xaxis.set_ticks_position('bottom')
-    plt.tight_layout(1, 1, 1)
+    #axs[8].set_title('reg_pedal_onset_roll', fontsize=fontsize)
+    #axs[9].set_title('reg_pedal_offset_roll', fontsize=fontsize)
+    #axs[10].set_title('pedal_frame_roll', fontsize=fontsize)
+    #axs[10].set_xlabel('frames')
+    #axs[10].xaxis.set_label_position('bottom')
+    #axs[10].xaxis.set_ticks_position('bottom')
+    #plt.tight_layout()
     plt.savefig(fig_path)
 
     print('Write out to {}, {}, {}!'.format(audio_path, midi_path, fig_path))

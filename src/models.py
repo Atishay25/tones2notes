@@ -82,7 +82,7 @@ class ConvBlock(nn.Module):
             x = F.avg_pool2d(x, kernel_size=pool_size)
         
         return x
-    
+'''
 class AcousticModel(nn.Module):
     def __init__(self, num_classes, midfeat, momentum):
         super(AcousticModel, self).__init__()
@@ -124,6 +124,85 @@ class AcousticModel(nn.Module):
         x = F.dropout(x, p=0.5, training=self.training, inplace=False)
         output = torch.sigmoid(self.fc(x))
         return output
+'''
+class AcousticModel(nn.Module):
+    def __init__(self, num_classes, midfeat, momentum):
+        super(AcousticModel, self).__init__()
+        in1 = 1
+        out1 = 48
+        in2 = 48
+        out2 = 64
+        in3 = 64
+        out3 = 96
+        in4 = 96
+        out4 = 128
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(in_channels=in1, out_channels=out1, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(out1,momentum),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=out1, out_channels=out1, kernel_size=3, padding=1, stride=1, bias=False),
+            nn.BatchNorm2d(out1,momentum),
+            nn.ReLU(),
+            nn.AvgPool2d(kernel_size=(1,2))
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(in_channels=in2, out_channels=out2, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(out2,momentum),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=out2, out_channels=out2, kernel_size=3, padding=1, stride=1, bias=False),
+            nn.BatchNorm2d(out2,momentum),
+            nn.ReLU(),
+            nn.AvgPool2d(kernel_size=(1,2))
+        )
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(in_channels=in3, out_channels=out3, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(out3,momentum),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=out3, out_channels=out3, kernel_size=3, padding=1, stride=1, bias=False),
+            nn.BatchNorm2d(out3,momentum),
+            nn.ReLU(),
+            nn.AvgPool2d(kernel_size=(1,2))
+        )
+        self.conv4 = nn.Sequential(
+            nn.Conv2d(in_channels=in4, out_channels=out4, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(out4,momentum=momentum),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=out4, out_channels=out4, kernel_size=3, padding=1, stride=1, bias=False),
+            nn.BatchNorm2d(out4,momentum=momentum),
+            nn.ReLU(),
+            nn.AvgPool2d(kernel_size=(1,2))
+        )
+        self.fc5 = nn.Linear(midfeat, 768, bias=False)
+        self.bn5 = nn.BatchNorm1d(768, momentum=momentum)
+        self.gru = nn.GRU(input_size=768, hidden_size=256, num_layers=2, bias=True, batch_first=True, dropout=0, bidirectional=True)
+        self.fc = nn.Linear(512, num_classes, bias=True)
+        self.dp = nn.Dropout(p=0.2)
+        self.relu = nn.ReLU()
+        self.dp1 = nn.Dropout(p=0.5, inplace=False)
+        self.dp2 = nn.Dropout(p=0.5, inplace=False)
+        self.sg = nn.Sigmoid()
+        
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.dp(x)
+        x = self.conv2(x)
+        x = self.dp(x)
+        x = self.conv3(x)
+        x = self.dp(x)
+        x = self.conv4(x)
+        x = self.dp(x)
+        x = x.transpose(1,2).flatten(2)
+        x = self.fc5(x)
+        x = x.transpose(1,2)
+        x = self.bn5(x)
+        x = x.transpose(1,2)
+        x = self.relu(x)
+        x = self.dp1(x)
+        (x, _) = self.gru(x)
+        x = self.dp2(x)
+        output = self.sg(self.fc(x))
+        return output
+
 
 class Net(nn.Module):
     def __init__(self, num_classes, midfeat, momentum):
@@ -131,10 +210,10 @@ class Net(nn.Module):
         n_in = 229
         n_hid = 1000
         n_out = num_classes
-        self.fc1 = nn.Linear(n_in, n_hid)
-        self.fc2 = nn.Linear(n_hid, n_hid)
-        self.fc3 = nn.Linear(n_hid, n_hid)
-        self.fc4 = nn.Linear(n_hid, n_out)
+        self.fc1 = nn.Linear(n_in, 200)
+        self.fc2 = nn.Linear(200, 150)
+        self.fc3 = nn.Linear(150, 100)
+        self.fc4 = nn.Linear(100, n_out)
 
     def forward(self, x):
         drop_p = 0.2

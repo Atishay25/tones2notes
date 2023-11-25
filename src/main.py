@@ -6,6 +6,7 @@ import argparse
 import h5py
 import time
 import math
+from tqdm import tqdm
 
 import torch 
 import torch.nn as nn
@@ -145,11 +146,28 @@ def train(args):
         model.to(device)
 
     train_bgn_time = time.time()
+    '''
+    val_prev_loss = 10000000.0
+    for i in range(1,5):
+        losses = []
+        print('Current epoch: ', i)
+        model.train()
 
+        for batch_data_dict in train_loader:
+            for key in batch_data_dict.keys():
+                batch_data_dict[key] = move_data_to_device(batch_data_dict[key], device)
+            batch_output_dict = model(batch_data_dict['waveform'])
+            loss = loss_func(model, batch_output_dict, batch_data_dict)
+            print(loss.item())
+            losses.append(loss.item())
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+    '''
     for batch_data_dict in train_loader:
         
         # Evaluation 
-        if iteration % 5000 == 0:# and iteration > 0:
+        if iteration % 1000 == 0:# and iteration > 0:
             #logging.info('------------------------------------')
             #logging.info('Iteration: {}'.format(iteration))
             print('--------------------------------')
@@ -179,11 +197,12 @@ def train(args):
             train_bgn_time = time.time()
         
         # Save model
-        if iteration % 20000 == 0:
+        if iteration % 5000 == 0:
             checkpoint = {
                 'iteration': iteration, 
                 'model': model.module.state_dict(), 
-                'sampler': train_sampler.state_dict()}
+                'sampler': train_sampler.state_dict()
+            }
 
             checkpoint_path = os.path.join(
                 checkpoints_dir, '{}_iterations.pth'.format(iteration))
@@ -206,13 +225,12 @@ def train(args):
 
         loss = loss_func(model, batch_output_dict, batch_data_dict)
 
-        print(iteration, loss)
+        print('Iteration: ',iteration, '\tLoss: ',loss.item())
 
         # Backward
-        loss.backward()
-        
-        optimizer.step()
         optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
         
         # Stop learning
         if iteration == early_stop:

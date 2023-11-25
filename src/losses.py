@@ -6,10 +6,12 @@ def bce(output, target, mask):
     """Binary crossentropy (BCE) with mask. The positions where mask=0 will be 
     deactivated when calculation BCE.
     """
+
     eps = 1e-7
     output = torch.clamp(output, eps, 1. - eps)
     matrix = - target * torch.log(output) - (1. - target) * torch.log(1. - output)
-    return torch.sum(matrix * mask) / torch.sum(mask)
+    bc_error = torch.sum(matrix * mask) / torch.sum(mask)
+    return bc_error
 
 ############ High-resolution regression loss ############
 def regress_onset_offset_frame_velocity_bce(model, output_dict, target_dict):

@@ -8,7 +8,7 @@ import collections
 import librosa
 import logging
 
-from utils import (traverse_folder, TargetProcessor, write_events_to_midi, 
+from processing import (traverse_folder, TargetProcessor, write_events_to_midi, 
     plot_waveform_midi_targets)
 import config
 

@@ -1,5 +1,6 @@
 import os
 import sys
+sys.path.insert(1, os.path.join(sys.path[0], '../utils'))
 import numpy as np
 import argparse
 import h5py
@@ -12,12 +13,13 @@ import torch.optim as optim
 import torch.utils.data
 
 import config
-from losses import get_loss_func
+from losses import get_loss_func 
 from data_generator import MapsDataset, Sampler, TestSampler, collate_fn
 from eval import SegmentEvaluator
-from utils import StatisticsContainer, create_folder, get_filename
+from processing import StatisticsContainer, create_folder, get_filename
 from pytorch_utils import move_data_to_device
 from models import Net, CCNN
+
 
 def train(args):
     workspace = args.workspace
@@ -61,15 +63,11 @@ def train(args):
     create_folder(os.path.dirname(statistics_path))
 
     if 'cuda' in str(device):
-        #logging.info('Using GPU.')
         device = 'cuda'
     else:
-        #logging.info('Using CPU.')
         device = 'cpu'
 
     Model = eval(model_type)
-
-    #model = Model(frames_per_second=frames_per_second, classes_num=classes_num)
     model  = Model(frames_per_second=frames_per_second, classes_num=classes_num)
     if augmentation == 'none':
         augmentor = None
@@ -163,9 +161,6 @@ def train(args):
             validate_statistics = evaluator.evaluate(validate_loader)
             test_statistics = evaluator.evaluate(test_loader)
 
-            #logging.info('    Train statistics: {}'.format(evaluate_train_statistics))
-            #logging.info('    Validation statistics: {}'.format(validate_statistics))
-            #logging.info('    Test statistics: {}'.format(test_statistics))
             print('Train Stats', evaluate_train_statistics)
             print('Val Stats', validate_statistics)
             print('Test Stats', test_statistics)

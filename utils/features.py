@@ -7,7 +7,7 @@ import config
 import librosa
 import argparse
 
-from utils import read_maps_midi
+from processing import read_maps_midi
 from sklearn.model_selection import train_test_split
 
 def pack_maps(args):

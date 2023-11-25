@@ -15,4 +15,5 @@ __pycache__/
 *_feature/
 tensorboard/
 hdf5s/
-
+checkpoints/
+statistics/

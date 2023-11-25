@@ -8,7 +8,7 @@ from torchlibrosa.stft import Spectrogram, LogmelFilterBank
 class Net(nn.Module):
     def __init__(self, num_classes, midfeat, momentum):
         super(Net, self).__init__()
-        n_in = 160000
+        n_in = 229
         n_hid = 1000
         n_out = num_classes
         self.fc1 = nn.Linear(n_in, n_hid)
@@ -18,10 +18,7 @@ class Net(nn.Module):
 
     def forward(self, x):
         drop_p = 0.2
-        print(x.shape)
-        exit()
-        x1 = x.view(len(x), -1)
-        x2 = F.dropout(F.relu(self.fc1(x1)), p=drop_p, training=self.training)
+        x2 = F.dropout(F.relu(self.fc1(x)), p=drop_p, training=self.training)
         x3 = F.dropout(F.relu(self.fc2(x2)), p=drop_p, training=self.training)
         x4 = F.dropout(F.relu(self.fc3(x3)), p=drop_p, training=self.training)
         x5 = F.sigmoid(self.fc4(x4))
@@ -79,7 +76,7 @@ class CCNN(nn.Module):
         x = x.transpose(1, 3)
         x = self.bn0(x)
         x = x.transpose(1, 3)
-
+        x = x.view(6,1001,229)
         frame_output = self.frame_model(x)  # (batch_size, time_steps, classes_num)
         reg_onset_output = self.reg_onset_model(x)  # (batch_size, time_steps, classes_num)
         reg_offset_output = self.reg_offset_model(x)    # (batch_size, time_steps, classes_num)

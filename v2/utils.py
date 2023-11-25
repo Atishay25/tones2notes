@@ -152,6 +152,7 @@ class TargetProcessor(object):
             'onset_roll': onset_roll, 'offset_roll': offset_roll,
             'reg_onset_roll': reg_onset_roll, 'reg_offset_roll': reg_offset_roll,
             'frame_roll': frame_roll, 'velocity_roll': velocity_roll, 
+            'mask_roll': mask_roll
             }
         return target_dict, note_events
     

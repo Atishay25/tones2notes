@@ -17,7 +17,7 @@ from data_generator import MapsDataset, Sampler, TestSampler, collate_fn
 from eval import SegmentEvaluator
 from utils import StatisticsContainer, create_folder, get_filename
 from pytorch_utils import move_data_to_device
-from models import Net
+from models import Net, CCNN
 
 def train(args):
     workspace = args.workspace
@@ -70,7 +70,7 @@ def train(args):
     Model = eval(model_type)
 
     #model = Model(frames_per_second=frames_per_second, classes_num=classes_num)
-    model  = Model(3,88,1)
+    model  = Model(frames_per_second=frames_per_second, classes_num=classes_num)
     if augmentation == 'none':
         augmentor = None
     #elif augmentation == 'aug':

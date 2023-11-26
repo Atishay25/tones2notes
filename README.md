@@ -7,12 +7,23 @@ Found 3 possible good datasets for Music Transcription -
 - MusicNet : https://zenodo.org/records/5120004#.YXDPwKBlBpQ
 - MAESTRO : https://magenta.tensorflow.org/datasets/maestro 
 
+## Instructions
+- For loading features from dataset and storing them into .h5 files
+    ```
+    python3 features.py --dir $DATASET_DIR --workspace $WORKSPACE
+    ```
+- For training the model (includes both processing features and training on them)
+    ```
+    python3 src/main.py train --workspace=$WORKSPACE --model_type='CCNN' --loss_type='regress_onset_offset_frame_velocity_bce' --augmentation='none' --max_note_shift=0 --batch_size=8 --learning_rate=5e-4 --reduce_iteration=10000 --resume_iteration=0 --early_stop=50000 --cuda
+    ```
+- For transcribing any given audio
+    ```
+    ./transcribe.sh
+    ```
+    with required audio_path and model checkpoint
 
 
-### Commands
-
-
-
+### v1 
 - For running `train_model.py`
 ```
  CUDA_VISIBLE_DEVICES=1,2,4 python3 -W ignore train_model.py MAPS mymodel --channels 1 3 --label-type frame_onset --epoch 10 --steps 3000 --timesteps 128 --early-stop 6 --train-batch-size 8  --val-batch-size 8 

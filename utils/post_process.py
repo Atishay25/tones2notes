@@ -5,7 +5,7 @@ import pickle
 import h5py
 import mir_eval
 from sklearn import metrics
-from concurrent.features import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 
 from processing import (get_filename, traverse_folder, onsets_frames_note_detection)
 

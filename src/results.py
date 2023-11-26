@@ -11,7 +11,7 @@ import config
 
 from post_process import (ScoreCalculator)
 from processing import (create_folder, get_filename, traverse_folder, TargetProcessor)
-from inference import PianoTranscripton
+from transcribe import PianoTranscription
 
 def inference(args):
     workspace = args.workspace
@@ -20,7 +20,7 @@ def inference(args):
     augmentation = args.augmentation
     dataset = args.dataset
     split = args.split
-    post_processsor_type = args.post_process_type
+    post_processor_type = args.post_processor_type
     
     device = torch.device('cuda') if args.cuda and torch.cuda.is_available() else torch.device('cpu')
 
@@ -39,17 +39,15 @@ def inference(args):
         'split={}'.format(split))
     create_folder(probs)
 
-    transcriptor = PianoTranscripton(model_type, device=device,
+    transcriptor = PianoTranscription(model_type, device=device,
         checkpoint_path=checkpoint_path, segment_samples=segment_samples,
-        post_processsor_type=post_processsor_type)
+        post_processor_type=post_processor_type)
     
-    (paths, names) = traverse_folder(hdf5s)
+    (names, paths) = traverse_folder(hdf5s)
 
-    n = 0
-    for n, path in enumerate(paths):
+    for path in paths:
         with h5py.File(path, 'r') as hf:
             if hf.attrs['split'].decode() == split:
-                n += 1
 
                 audio = (hf['waveform'][:] / 32767.).astype(np.float32)
                 midi_events = [e.decode() for e in hf['midi_event'][:]]
@@ -132,7 +130,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.mode == 'inference':
+    if args.mode == 'infer_prob':
         inference(args)
 
     elif args.mode == 'calculate_metrics':

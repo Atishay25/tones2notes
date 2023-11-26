@@ -165,7 +165,7 @@ def train(args):
             optimizer.step()
     '''
     for batch_data_dict in train_loader:
-        
+        '''
         # Evaluation 
         if iteration % 1000 == 0:# and iteration > 0:
             #logging.info('------------------------------------')
@@ -235,8 +235,11 @@ def train(args):
         # Stop learning
         if iteration == early_stop:
             break
-
+    ''' 
+        if iteration % 1000 == 0:
+            print(iteration)
         iteration += 1
+    
 
 if __name__ == '__main__':
 

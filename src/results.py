@@ -3,19 +3,14 @@ sys.path.insert(1, os.path.join(sys.path[0], '../utils'))
 
 import numpy as np
 import argparse
-import librosa, mir_eval
 import torch
 import time
 import h5py
 import pickle
-
-from sklearn import metrics
-from concurrent.features import ProcessPoolExecutor
+import config
 
 from post_process import (ScoreCalculator)
-from processing import (create_folder, get_filename, traverse_folder, TargetProcessor,)
-
-import config
+from processing import (create_folder, get_filename, traverse_folder, TargetProcessor)
 from inference import PianoTranscripton
 
 def inference(args):

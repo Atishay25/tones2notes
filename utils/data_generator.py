@@ -60,12 +60,7 @@ class MapsDataset(object):
             'reg_offset_roll': (frames_num, classes_num), 
             'frame_roll': (frames_num, classes_num), 
             'velocity_roll': (frames_num, classes_num), 
-            'mask_roll':  (frames_num, classes_num), 
-            'pedal_onset_roll': (frames_num,), 
-            'pedal_offset_roll': (frames_num,), 
-            'reg_pedal_onset_roll': (frames_num,), 
-            'reg_pedal_offset_roll': (frames_num,), 
-            'pedal_frame_roll': (frames_num,)}
+            'mask_roll':  (frames_num, classes_num)}
         """
         #print(meta)
         hdf5_name = meta[0]
@@ -102,7 +97,7 @@ class MapsDataset(object):
             midi_events_time = hf['midi_event_time'][:]
 
             # Process MIDI events to target
-            (target_dict, note_events) = self.target_processor.process(start_time, midi_events_time, midi_events, extend_pedal=False, note_shift=note_shift)
+            (target_dict, note_events) = self.target_processor.process(start_time, midi_events_time, midi_events, note_shift=note_shift)
 
         # Combine input and target
         for key in target_dict.keys():

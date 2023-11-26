@@ -44,7 +44,6 @@ class PianoTranscription(object):
         self.onset_threshold = 0.3
         self.offset_threshod = 0.3
         self.frame_threshold = 0.1
-        self.pedal_offset_threshold = 0.2
 
         # Build model
         Model = eval(model_type)
@@ -71,8 +70,7 @@ class PianoTranscription(object):
           midi_path: str, path to write out the transcribed MIDI.
 
         Returns:
-          transcribed_dict, dict: {'output_dict':, ..., 'est_note_events': ..., 
-            'est_pedal_events': ...}
+          transcribed_dict, dict: {'output_dict':, ..., 'est_note_events': ..., }
         """
 
         audio = audio[None, :]  # (1, audio_samples)
@@ -99,10 +97,7 @@ class PianoTranscription(object):
           'reg_onset_output': (segment_frames, classes_num), 
           'reg_offset_output': (segment_frames, classes_num), 
           'frame_output': (segment_frames, classes_num), 
-          'velocity_output': (segment_frames, classes_num), 
-          'reg_pedal_onset_output': (segment_frames, 1), 
-          'reg_pedal_offset_output': (segment_frames, 1), 
-          'pedal_frame_output': (segment_frames, 1)}"""
+          'velocity_output': (segment_frames, classes_num)}"""
 
         # Post processor
         if self.post_processor_type == 'regression':
@@ -110,8 +105,7 @@ class PianoTranscription(object):
             post_processor = RegressionPostProcessor(self.frames_per_second, 
                 classes_num=self.classes_num, onset_threshold=self.onset_threshold, 
                 offset_threshold=self.offset_threshod, 
-                frame_threshold=self.frame_threshold, 
-                pedal_offset_threshold=self.pedal_offset_threshold)
+                frame_threshold=self.frame_threshold)
 
         #elif self.post_processor_type == 'onsets_frames':
         #    """Google's onsets and frames post processing algorithm. Only used 
@@ -120,19 +114,16 @@ class PianoTranscription(object):
         #        self.classes_num)
 
         # Post process output_dict to MIDI events
-        (est_note_events, est_pedal_events) = \
-            post_processor.output_dict_to_midi_events(output_dict)
+        est_note_events = post_processor.output_dict_to_midi_events(output_dict)
 
         # Write MIDI events to file
         if midi_path:
-            write_events_to_midi(start_time=0, note_events=est_note_events, 
-                pedal_events=est_pedal_events, midi_path=midi_path)
+            write_events_to_midi(start_time=0, note_events=est_note_events, midi_path=midi_path)
             print('Write out to {}'.format(midi_path))
 
         transcribed_dict = {
             'output_dict': output_dict, 
-            'est_note_events': est_note_events,
-            'est_pedal_events': est_pedal_events}
+            'est_note_events': est_note_events}
 
         return transcribed_dict
 
@@ -230,20 +221,17 @@ def inference(args):
     plot = True
     if plot:
         output_dict = transcribed_dict['output_dict']
-        fig, axs = plt.subplots(4, 1, figsize=(15, 8), sharex=True)
+        fig, axs = plt.subplots(3, 1, figsize=(15, 8), sharex=True)
         mel = librosa.feature.melspectrogram(audio, sr=16000, n_fft=2048, hop_length=160, n_mels=229, fmin=30, fmax=8000)
         axs[0].matshow(np.log(mel), origin='lower', aspect='auto', cmap='jet')
         axs[1].matshow(output_dict['frame_output'].T, origin='lower', aspect='auto', cmap='jet')
         axs[2].matshow(output_dict['reg_onset_output'].T, origin='lower', aspect='auto', cmap='jet')
         axs[3].matshow(output_dict['reg_offset_output'].T, origin='lower', aspect='auto', cmap='jet')
-        #axs[4].plot(output_dict['pedal_frame_output'])
         axs[0].set_xlim(0, len(output_dict['frame_output']))
-        #axs[4].set_xlabel('Frames')
         axs[0].set_title('Log mel spectrogram')
         axs[1].set_title('frame_output')
         axs[2].set_title('reg_onset_output')
         axs[3].set_title('reg_offset_output')
-        #axs[4].set_title('pedal_frame_output')
         plt.tight_layout()
         fig_path = '_zz.png'.format(get_filename(audio_path))
         plt.savefig(fig_path)

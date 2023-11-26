@@ -70,8 +70,7 @@ class TargetProcessor(object):
         self.classes_num = classes_num
         self.max_piano_note = self.classes_num - 1
 
-    def process(self, start_time, midi_events_time, midi_events, 
-        extend_pedal=True, note_shift=0):
+    def process(self, start_time, midi_events_time, midi_events, note_shift=0):
         for bgn_idx, event_time in enumerate(midi_events_time):
             if event_time > start_time:
                 break
@@ -182,7 +181,7 @@ class TargetProcessor(object):
 
         return output
     
-def write_events_to_midi(start_time, note_events, midi_path, pedal_events=False):
+def write_events_to_midi(start_time, note_events, midi_path):
     """Write out note events to MIDI file.
 
     Args:
@@ -230,11 +229,6 @@ def write_events_to_midi(start_time, note_events, midi_path, pedal_events=False)
             'midi_note': note_event['midi_note'], 
             'velocity': 0})
 
-    if pedal_events:
-        for pedal_event in pedal_events:
-            message_roll.append({'time': pedal_event['onset_time'], 'control_change': 64, 'value': 127})
-            message_roll.append({'time': pedal_event['offset_time'], 'control_change': 64, 'value': 0})
-
     # Sort MIDI messages by time
     message_roll.sort(key=lambda note_event: note_event['time'])
 
@@ -266,10 +260,7 @@ def plot_waveform_midi_targets(data_dict, start_time, note_events):
         'reg_offset_roll': (frames_num, classes_num), 
         'frame_roll': (frames_num, classes_num), 
         'velocity_roll': (frames_num, classes_num), 
-        'mask_roll':  (frames_num, classes_num), 
-        'reg_pedal_onset_roll': (frames_num,),
-        'reg_pedal_offset_roll': (frames_num,),
-        'pedal_frame_roll': (frames_num,)}
+        'mask_roll':  (frames_num, classes_num)}
       start_time: float
       note_events: list of dict, e.g. [
         {'midi_note': 51, 'onset_time': 696.63544, 'offset_time': 696.9948, 'velocity': 44}, 
@@ -298,9 +289,6 @@ def plot_waveform_midi_targets(data_dict, start_time, note_events):
     axs[5].matshow(data_dict['frame_roll'].T, origin='lower', aspect='auto', cmap='jet')
     axs[6].matshow(data_dict['velocity_roll'].T, origin='lower', aspect='auto', cmap='jet')
     axs[7].matshow(data_dict['mask_roll'].T, origin='lower', aspect='auto', cmap='jet')
-    #axs[8].matshow(data_dict['reg_pedal_onset_roll'][:, None].T, origin='lower', aspect='auto', cmap='jet')
-    #axs[9].matshow(data_dict['reg_pedal_offset_roll'][:, None].T, origin='lower', aspect='auto', cmap='jet')
-    #axs[10].matshow(data_dict['pedal_frame_roll'][:, None].T, origin='lower', aspect='auto', cmap='jet')
     axs[0].set_title('Log spectrogram', fontsize=fontsize)
     axs[1].set_title('onset_roll', fontsize=fontsize)
     axs[2].set_title('offset_roll', fontsize=fontsize)
@@ -309,13 +297,6 @@ def plot_waveform_midi_targets(data_dict, start_time, note_events):
     axs[5].set_title('frame_roll', fontsize=fontsize)
     axs[6].set_title('velocity_roll', fontsize=fontsize)
     axs[7].set_title('mask_roll', fontsize=fontsize)
-    #axs[8].set_title('reg_pedal_onset_roll', fontsize=fontsize)
-    #axs[9].set_title('reg_pedal_offset_roll', fontsize=fontsize)
-    #axs[10].set_title('pedal_frame_roll', fontsize=fontsize)
-    #axs[10].set_xlabel('frames')
-    #axs[10].xaxis.set_label_position('bottom')
-    #axs[10].xaxis.set_ticks_position('bottom')
-    #plt.tight_layout()
     plt.savefig(fig_path)
 
     print('Write out to {}, {}, {}!'.format(audio_path, midi_path, fig_path))
@@ -354,56 +335,39 @@ class StatisticsContainer(object):
                 
         self.statistics_dict = resume_statistics_dict
 
-def onsets_frames_pedal_detection(frame_output, offset_output, frame_threshold):
-    """Process pedal prediction matrices to pedal events information.
+###### Google's onsets and frames post processing. Only used for comparison ######
+def onsets_frames_note_detection(frame_output, onset_output, offset_output, 
+    velocity_output, threshold):
+    """Process pedal prediction matrices to note events information. onset_ouput 
+    is used to detect the presence of notes. frame_output is used to detect the 
+    offset of notes.
     
     Args:
       frame_output: (frames_num,)
-      offset_output: (frames_num,)
-      offset_shift_output: (frames_num,)
-      frame_threshold: float
-
+      onset_output: (frames_num,)
+      threshold: float
+    
     Returns: 
-      output_tuples: list of [bgn, fin], 
-      e.g., [
-        [1821, 1909], 
-        [1909, 1947], 
-        ...]
+      bgn_fin_pairs: list of [bgn, fin, velocity]. E.g. 
+        [[1821, 1909, 0.47498, 0.72119445], 
+         [1909, 1947, 0.30730522, 0.64200014], 
+         ...]
     """
     output_tuples = []
-    bgn = None
-    frame_disappear = None
-    offset_occur = None
 
-    for i in range(1, frame_output.shape[0]):
-        if frame_output[i] >= frame_threshold and frame_output[i] > frame_output[i - 1]:
-            if bgn:
-                pass
-            else:
-                bgn = i
+    loct = None
+    for i in range(onset_output.shape[0]):
+        # Use onset_output is used to detect the presence of notes
+        if onset_output[i] > threshold:
+            if loct:
+                output_tuples.append([loct, i, velocity_output[loct]])
+            loct = i
+        if loct and i > loct:
+            # Use frame_output is used to detect the offset of notes
+            if frame_output[i] <= threshold:
+                output_tuples.append([loct, i, velocity_output[loct]])
+                loct = None
 
-        if bgn and i > bgn:
-            """If onset found, then search offset"""
-            if frame_output[i] <= frame_threshold and not frame_disappear:
-                """Frame disappear detected"""
-                frame_disappear = i
-
-            if offset_output[i] == 1 and not offset_occur:
-                """Offset detected"""
-                offset_occur = i
-
-            if offset_occur:
-                fin = offset_occur
-                output_tuples.append([bgn, fin])
-                bgn, frame_disappear, offset_occur = None, None, None
-
-            if frame_disappear and i - frame_disappear >= 10:
-                """offset not detected but frame disappear"""
-                fin = frame_disappear
-                output_tuples.append([bgn, fin])
-                bgn, frame_disappear, offset_occur = None, None, None
-
-    # Sort pairs by onsets
     output_tuples.sort(key=lambda pair: pair[0])
 
     return output_tuples

@@ -16,7 +16,7 @@ from data_generator import MapsDataset, Sampler, TestSampler, collate_fn
 from eval import SegmentEvaluator
 from processing import StatisticsContainer, create_folder, get_filename
 from pytorch_utils import move_data_to_device
-from models import Net, CCNN
+from models import Net, CCNN, CCNN_without_condidioning
 
 
 def train(args):

@@ -1,11 +1,8 @@
 import os
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '../utils'))
-import numpy as np
 import argparse
-import h5py
 import time
-import math
 from tqdm import tqdm
 
 import torch 
@@ -49,18 +46,20 @@ def train(args):
 
     hdf5s_dir = os.path.join(workspace, 'hdf5s', 'maps')
 
-    checkpoints_dir = os.path.join(workspace, 'checkpoints', filename, 
-        model_type, 'loss_type={}'.format(loss_type), 
-        'augmentation={}'.format(augmentation), 
-        'max_note_shift={}'.format(max_note_shift),
-        'batch_size={}'.format(batch_size))
+    #checkpoints_dir = os.path.join(workspace, 'checkpoints', filename, 
+    #    model_type, 'loss_type={}'.format(loss_type), 
+    #    'augmentation={}'.format(augmentation), 
+    #    'max_note_shift={}'.format(max_note_shift),
+    #    'batch_size={}'.format(batch_size))
+    checkpoints_dir = os.path.join(workspace, 'checkpoints', 'remove_dropout')
     create_folder(checkpoints_dir)
 
-    statistics_path = os.path.join(workspace, 'statistics', filename, 
-        model_type, 'loss_type={}'.format(loss_type), 
-        'augmentation={}'.format(augmentation), 
-        'max_note_shift={}'.format(max_note_shift), 
-        'batch_size={}'.format(batch_size), 'statistics.pkl')
+    #statistics_path = os.path.join(workspace, 'statistics', filename, 
+    #    model_type, 'loss_type={}'.format(loss_type), 
+    #    'augmentation={}'.format(augmentation), 
+    #    'max_note_shift={}'.format(max_note_shift), 
+    #    'batch_size={}'.format(batch_size), 'statistics.pkl')
+    statistics_path = os.path.join(workspace, 'statistics', 'remove_dropout')
     create_folder(os.path.dirname(statistics_path))
 
     if 'cuda' in str(device):
@@ -165,9 +164,8 @@ def train(args):
             optimizer.step()
     '''
     for batch_data_dict in train_loader:
-        '''
         # Evaluation 
-        if iteration % 1000 == 0:# and iteration > 0:
+        if iteration % 100 == 0:# and iteration > 0:
             #logging.info('------------------------------------')
             #logging.info('Iteration: {}'.format(iteration))
             print('--------------------------------')
@@ -197,7 +195,7 @@ def train(args):
             train_bgn_time = time.time()
         
         # Save model
-        if iteration % 5000 == 0:
+        if iteration % 500 == 0:
             checkpoint = {
                 'iteration': iteration, 
                 'model': model.module.state_dict(), 
@@ -235,9 +233,6 @@ def train(args):
         # Stop learning
         if iteration == early_stop:
             break
-    ''' 
-        if iteration % 1000 == 0:
-            print(iteration)
         iteration += 1
     
 

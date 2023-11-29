@@ -3,10 +3,8 @@ import sys
 sys.path.insert(1, os.path.join(sys.path[0], '../utils'))
 import argparse
 import time
-from tqdm import tqdm
 
 import torch 
-import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data
 
@@ -14,25 +12,23 @@ import config
 from losses import get_loss_func 
 from data_generator import MapsDataset, Sampler, TestSampler, collate_fn
 from eval import SegmentEvaluator
-from processing import StatisticsContainer, create_folder, get_filename
+from processing import StatisticsContainer, create_folder
 from pytorch_utils import move_data_to_device
-from models import Net, CCNN, CCNN_without_condidioning
+from models import Net, CCNN, CRNN, CRNN_Conditioning
 
 
 def train(args):
     workspace = args.workspace
     model_type = args.model_type
-    loss_type = args.loss_type
-    augmentation = args.augmentation
     max_note_shift = args.max_note_shift
     batch_size = args.batch_size
     learning_rate = args.learning_rate
     reduce_iteration = args.reduce_iteration
     resume_iteration = args.resume_iteration
     early_stop = args.early_stop
+    loss_type = args.loss_type
     device = torch.device('cuda') if args.cuda and torch.cuda.is_available() else torch.device('cpu')
     mini_data = args.mini_data
-    filename = args.filename
 
     sample_rate = config.sample_rate
     segment_seconds = config.segment_seconds
@@ -42,24 +38,20 @@ def train(args):
     classes_num = config.classes_num
     num_workers = 8
 
-    loss_func= get_loss_func(loss_type)
+    loss_func= get_loss_func(loss_type)         # can change loss function if want
 
     hdf5s_dir = os.path.join(workspace, 'hdf5s', 'maps')
 
-    #checkpoints_dir = os.path.join(workspace, 'checkpoints', filename, 
-    #    model_type, 'loss_type={}'.format(loss_type), 
-    #    'augmentation={}'.format(augmentation), 
-    #    'max_note_shift={}'.format(max_note_shift),
-    #    'batch_size={}'.format(batch_size))
-    checkpoints_dir = os.path.join(workspace, 'checkpoints', 'remove_dropout')
+    checkpoints_dir = os.path.join(workspace, 'checkpoints', model_type,
+        'loss_type={}'.format(loss_type), 
+        'max_note_shift={}'.format(max_note_shift),
+        'batch_size={}'.format(batch_size))
     create_folder(checkpoints_dir)
 
-    #statistics_path = os.path.join(workspace, 'statistics', filename, 
-    #    model_type, 'loss_type={}'.format(loss_type), 
-    #    'augmentation={}'.format(augmentation), 
-    #    'max_note_shift={}'.format(max_note_shift), 
-    #    'batch_size={}'.format(batch_size), 'statistics.pkl')
-    statistics_path = os.path.join(workspace, 'statistics', 'remove_dropout')
+    statistics_path = os.path.join(workspace, 'statistics', model_type,
+        'loss_type={}'.format(loss_type), 
+        'max_note_shift={}'.format(max_note_shift), 
+        'batch_size={}'.format(batch_size), 'statistics.pkl')
     create_folder(os.path.dirname(statistics_path))
 
     if 'cuda' in str(device):
@@ -69,16 +61,10 @@ def train(args):
 
     Model = eval(model_type)
     model  = Model(frames_per_second=frames_per_second, classes_num=classes_num)
-    if augmentation == 'none':
-        augmentor = None
-    #elif augmentation == 'aug':
-    #    augmentor = Augmentor()
-    #else:
-    #    raise Exception('Incorrect argumentation!')
 
     train_dataset = MapsDataset(hdf5s_dir=hdf5s_dir, 
         segment_seconds=segment_seconds, frames_per_second=frames_per_second, 
-        max_note_shift=max_note_shift, augmentor=augmentor)
+        max_note_shift=max_note_shift)
 
     evaluate_dataset = MapsDataset(hdf5s_dir=hdf5s_dir, 
         segment_seconds=segment_seconds, frames_per_second=frames_per_second, 
@@ -123,12 +109,10 @@ def train(args):
         betas=(0.9, 0.999), eps=1e-08, weight_decay=0., amsgrad=True)
     
     if resume_iteration > 0:
-        resume_checkpoint_path = os.path.join(workspace, 'checkpoints', filename, 
-            model_type, 'loss_type={}'.format(loss_type), 
-            'augmentation={}'.format(augmentation), 'batch_size={}'.format(batch_size), 
+        resume_checkpoint_path = os.path.join(workspace, 'checkpoints', 
+            model_type, 'loss_type={}'.format(loss_type), 'batch_size={}'.format(batch_size), 
                 '{}_iterations.pth'.format(resume_iteration))
 
-        #logging.info('Loading checkpoint {}'.format(resume_checkpoint_path))
         checkpoint = torch.load(resume_checkpoint_path)
         model.load_state_dict(checkpoint['model'])
         train_sampler.load_state_dict(checkpoint['sampler'])
@@ -145,32 +129,11 @@ def train(args):
         model.to(device)
 
     train_bgn_time = time.time()
-    '''
-    val_prev_loss = 10000000.0
-    for i in range(1,5):
-        losses = []
-        print('Current epoch: ', i)
-        model.train()
 
-        for batch_data_dict in train_loader:
-            for key in batch_data_dict.keys():
-                batch_data_dict[key] = move_data_to_device(batch_data_dict[key], device)
-            batch_output_dict = model(batch_data_dict['waveform'])
-            loss = loss_func(model, batch_output_dict, batch_data_dict)
-            print(loss.item())
-            losses.append(loss.item())
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-    '''
     for batch_data_dict in train_loader:
-        # Evaluation 
-        if iteration % 100 == 0:# and iteration > 0:
-            #logging.info('------------------------------------')
-            #logging.info('Iteration: {}'.format(iteration))
+        if iteration % 500 == 0:            # Evaluate Model at intervals on train, validation, test data
             print('--------------------------------')
             print('Iteration', iteration)
-
             train_fin_time = time.time()
 
             evaluate_train_statistics = evaluator.evaluate(evaluate_train_loader)
@@ -180,33 +143,24 @@ def train(args):
             print('Train Stats', evaluate_train_statistics)
             print('Val Stats', validate_statistics)
             print('Test Stats', test_statistics)
-            statistics_container.append(iteration, evaluate_train_statistics, data_type='train')
+            statistics_container.append(iteration, evaluate_train_statistics, data_type='train')        # Store the results in a file for stats
             statistics_container.append(iteration, validate_statistics, data_type='validation')
             statistics_container.append(iteration, test_statistics, data_type='test')
             statistics_container.dump()
-
             train_time = train_fin_time - train_bgn_time
             validate_time = time.time() - train_fin_time
-
-            #logging.info(
-            #    'Train time: {:.3f} s, validate time: {:.3f} s'
-            #    ''.format(train_time, validate_time))
             print('Train time: {:.3f} s, validate time: {:.3f} s'.format(train_time, validate_time))
             train_bgn_time = time.time()
-        
-        # Save model
-        if iteration % 500 == 0:
+        if iteration % 1000 == 0:                # Saving model at regular iterations for checkpoints
             checkpoint = {
                 'iteration': iteration, 
                 'model': model.module.state_dict(), 
                 'sampler': train_sampler.state_dict()
             }
-
             checkpoint_path = os.path.join(
                 checkpoints_dir, '{}_iterations.pth'.format(iteration))
                 
             torch.save(checkpoint, checkpoint_path)
-            #logging.info('Model saved to {}'.format(checkpoint_path))
             print('Model saved to ', checkpoint_path)
         
         # Reduce learning rate
@@ -238,16 +192,15 @@ def train(args):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Example of parser. ')
+    parser = argparse.ArgumentParser(description='Train Model')
     subparsers = parser.add_subparsers(dest='mode')
 
     parser_train = subparsers.add_parser('train') 
     parser_train.add_argument('--workspace', type=str, required=True)
-    parser_train.add_argument('--model_type', type=str, required=True)
-    parser_train.add_argument('--loss_type', type=str, required=True)
-    parser_train.add_argument('--augmentation', type=str, required=True, choices=['none', 'aug'])
+    parser_train.add_argument('--model_type', type=str, required=True, choices=['CCNN','CRNN','CRNN_Conditioning'])
     parser_train.add_argument('--max_note_shift', type=int, required=True)
     parser_train.add_argument('--batch_size', type=int, required=True)
+    parser_train.add_argument('--loss_type', type=str, required=True, choices=['regress_onset_offset_frame_velocity_bce','onset_offset_frame_velocity_bce'])
     parser_train.add_argument('--learning_rate', type=float, required=True)
     parser_train.add_argument('--reduce_iteration', type=int, required=True)
     parser_train.add_argument('--resume_iteration', type=int, required=True)
@@ -256,10 +209,7 @@ if __name__ == '__main__':
     parser_train.add_argument('--cuda', action='store_true', default=False)
     
     args = parser.parse_args()
-    args.filename = get_filename(__file__)
-
     if args.mode == 'train':
         train(args)
-
     else:
         raise Exception('Error argument!')

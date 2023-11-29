@@ -3,18 +3,15 @@ import sys
 sys.path.insert(1, os.path.join(sys.path[0], '../utils'))
 import numpy as np
 import argparse
-import h5py
-import math
 import time
 import librosa
-import logging
 import matplotlib.pyplot as plt
 
 import torch
  
 from processing import (create_folder, get_filename, write_events_to_midi, load_audio)
 from post_process import RegressionPostProcessor, OnsetsFramesPostProcessor
-from models import CCNN
+from models import CCNN, CRNN, CRNN_Conditioning
 from pytorch_utils import move_data_to_device, forward
 import config
 
@@ -107,11 +104,11 @@ class PianoTranscription(object):
                 offset_threshold=self.offset_threshod, 
                 frame_threshold=self.frame_threshold)
 
-        #elif self.post_processor_type == 'onsets_frames':
-        #    """Google's onsets and frames post processing algorithm. Only used 
-        #    for comparison."""
-        #    post_processor = OnsetsFramesPostProcessor(self.frames_per_second, 
-        #        self.classes_num)
+        elif self.post_processor_type == 'onsets_frames':
+            """Google's onsets and frames post processing algorithm. Only used 
+            for comparison."""
+            post_processor = OnsetsFramesPostProcessor(self.frames_per_second, 
+                self.classes_num)
 
         # Post process output_dict to MIDI events
         est_note_events = post_processor.output_dict_to_midi_events(output_dict)
@@ -218,10 +215,10 @@ def inference(args):
     print('Transcribe time: {:.3f} s'.format(time.time() - transcribe_time))
 
     # Visualize for debug
-    plot = True
+    plot = False
     if plot:
         output_dict = transcribed_dict['output_dict']
-        fig, axs = plt.subplots(3, 1, figsize=(15, 8), sharex=True)
+        fig, axs = plt.subplots(4, 1, figsize=(15, 8), sharex=True)
         mel = librosa.feature.melspectrogram(audio, sr=16000, n_fft=2048, hop_length=160, n_mels=229, fmin=30, fmax=8000)
         axs[0].matshow(np.log(mel), origin='lower', aspect='auto', cmap='jet')
         axs[1].matshow(output_dict['frame_output'].T, origin='lower', aspect='auto', cmap='jet')
@@ -241,7 +238,7 @@ def inference(args):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--model_type', type=str, required=True)
+    parser.add_argument('--model_type', type=str, required=True, choices=['CCNN', 'CRNN', 'CRNN_Conditioning'], help='Provide Model')
     parser.add_argument('--checkpoint_path', type=str, required=True)
     parser.add_argument('--post_processor_type', type=str, default='regression', choices=['onsets_frames', 'regression'])
     parser.add_argument('--audio_path', type=str, required=True)

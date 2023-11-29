@@ -1,16 +1,9 @@
-import os
-import sys
 import numpy as np
-import torch
-import h5py
-import time
-import librosa
-import logging
 from sklearn import metrics
 
 from pytorch_utils import forward_dataloader
 
-
+# Mean Absolute Error 
 def mae(target, output, mask):
     if mask is None:
         return np.mean(np.abs(target - output))
@@ -19,11 +12,10 @@ def mae(target, output, mask):
         output *= mask
         return np.sum(np.abs(target - output)) / np.clip(np.sum(mask), 1e-8, np.inf)
 
-
+# Evaluate each segment based on metrics 
 class SegmentEvaluator(object):
     def __init__(self, model, batch_size):
         """Evaluate segment-wise metrics.
-
         Args:
           model: object
           batch_size: int
@@ -80,24 +72,6 @@ class SegmentEvaluator(object):
             """Mask indictes only evaluate where onset exists"""
             statistics['velocity_mae'] = mae(output_dict['velocity_output'], 
                 output_dict['velocity_roll'] / 128, output_dict['onset_roll'])
-
-        # if 'reg_pedal_onset_output' in output_dict.keys():
-        #     statistics['reg_pedal_onset_mae'] = mae(
-        #         output_dict['reg_pedal_onset_roll'].flatten(), 
-        #         output_dict['reg_pedal_onset_output'].flatten(), 
-        #         mask=None)
-
-        # if 'reg_pedal_offset_output' in output_dict.keys():
-        #     statistics['reg_pedal_offset_mae'] = mae(
-        #         output_dict['reg_pedal_offset_output'].flatten(), 
-        #         output_dict['reg_pedal_offset_roll'].flatten(), 
-        #         mask=None)
-
-        # if 'pedal_frame_output' in output_dict.keys():
-        #     statistics['pedal_frame_mae'] = mae(
-        #         output_dict['pedal_frame_output'].flatten(), 
-        #         output_dict['pedal_frame_roll'].flatten(), 
-        #         mask=None)
 
         for key in statistics.keys():
             statistics[key] = np.around(statistics[key], decimals=4)

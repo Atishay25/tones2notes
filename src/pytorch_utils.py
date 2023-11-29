@@ -1,10 +1,5 @@
-import os
-import sys
 import numpy as np
-import time
-import librosa
 import torch
-import torch.nn as nn
 
 
 def move_data_to_device(x, device):
@@ -14,18 +9,14 @@ def move_data_to_device(x, device):
         x = torch.LongTensor(x)
     else:
         return x
-
     return x.to(device)
 
-
 def append_to_dict(dict, key, value):
-    
     if key in dict.keys():
         dict[key].append(value)
     else:
         dict[key] = [value]
 
- 
 def forward_dataloader(model, dataloader, batch_size, return_target=True):
     """Forward data generated from dataloader to model.
 

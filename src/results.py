@@ -8,16 +8,18 @@ import time
 import h5py
 import pickle
 import config
+import warnings
 
-from post_process import (ScoreCalculator)
-from processing import (create_folder, get_filename, traverse_folder, TargetProcessor)
+from post_process import ScoreCalculator
+from processing import create_folder, get_filename, traverse_folder, TargetProcessor
 from transcribe import PianoTranscription
+
+warnings.filterwarnings('ignore')
 
 def inference(args):
     workspace = args.workspace
     model_type = args.model_type
     checkpoint_path = args.checkpoint_path
-    augmentation = args.augmentation
     dataset = args.dataset
     split = args.split
     post_processor_type = args.post_processor_type
@@ -34,7 +36,7 @@ def inference(args):
     hdf5s = os.path.join(workspace, 'hdf5s', dataset)
     probs = os.path.join(workspace, 'probs',
         'model_type={}'.format(model_type),
-        'augmentation={}'.format(augmentation),
+        'post_processor={}'.format(post_processor_type),
         'dataset={}'.format(dataset),
         'split={}'.format(split))
     create_folder(probs)
@@ -82,7 +84,6 @@ def inference(args):
 def calculate_metrics(args, thresholds=None):
     workspace = args.workspace
     model_type = args.model_type
-    augmentation = args.augmentation
     dataset = args.dataset
     split = args.split
     post_processor_type = args.post_processor_type
@@ -90,15 +91,15 @@ def calculate_metrics(args, thresholds=None):
     hdf5s = os.path.join(workspace, 'hdf5s', dataset)
     probs = os.path.join(workspace, 'probs',
         'model_type={}'.format(model_type),
-        'augmentation={}'.format(augmentation),
+        'post_processor={}'.format(post_processor_type),
         'dataset={}'.format(dataset),
         'split={}'.format(split))
-    
-    score_calculaotr = ScoreCalculator(hdf5s, probs, split=split, post_processor_type=post_processor_type)
+
+    score_calculaotr = ScoreCalculator(hdf5s, probs, split=split, post_process_type=post_processor_type)
 
     if not thresholds:
         thresholds = [0.3, 0.3, 0.3]
-    
+
     start_time = time.time()
     stats_dict = score_calculaotr.metrics(thresholds)
     print('Time: {:.3f}'.format(time.time() - start_time))
@@ -113,23 +114,21 @@ if __name__ == '__main__':
     parser_infer_prob = subparsers.add_parser('infer_prob')
     parser_infer_prob.add_argument('--workspace', type=str, required=True)
     parser_infer_prob.add_argument('--model_type', type=str, required=True)
-    parser_infer_prob.add_argument('--augmentation', type=str, required=True)
     parser_infer_prob.add_argument('--checkpoint_path', type=str, required=True)
-    parser_infer_prob.add_argument('--dataset', type=str, required=True, choices=['maestro', 'maps'])
+    parser_infer_prob.add_argument('--dataset', type=str, required=True, choices=['maestro', 'maps','musicnet'])
     parser_infer_prob.add_argument('--split', type=str, required=True)
-    parser_infer_prob.add_argument('--post_processor_type', type=str, default='regression')
+    parser_infer_prob.add_argument('--post_processor_type', type=str, default='regression', choices=['regression', 'onsets_frames'])
     parser_infer_prob.add_argument('--cuda', action='store_true', default=False)
 
     parser_metrics = subparsers.add_parser('calculate_metrics')
     parser_metrics.add_argument('--workspace', type=str, required=True)
     parser_metrics.add_argument('--model_type', type=str, required=True)
-    parser_metrics.add_argument('--augmentation', type=str, required=True)
-    parser_metrics.add_argument('--dataset', type=str, required=True, choices=['maestro', 'maps'])
+    parser_metrics.add_argument('--dataset', type=str, required=True, choices=['maestro', 'maps','musicnet'])
     parser_metrics.add_argument('--split', type=str, required=True)
-    parser_metrics.add_argument('--post_processor_type', type=str, default='regression')
+    parser_metrics.add_argument('--post_processor_type', type=str, default='regression', choices=['regression', 'onsets_frames'])
 
     args = parser.parse_args()
-
+    
     if args.mode == 'infer_prob':
         inference(args)
 

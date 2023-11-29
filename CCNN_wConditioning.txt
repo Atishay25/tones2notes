@@ -1,0 +1,67 @@
+note f1: 0.562
+note f1: 0.320
+note f1: 0.397
+note f1: 0.342
+note f1: 0.304
+note f1: 0.351
+note f1: 0.628
+note f1: 0.489
+note f1: 0.561
+note f1: 0.670
+note f1: 0.554
+note f1: 0.407
+note f1: 0.364
+note f1: 0.417
+note f1: 0.459
+note f1: 0.273
+note f1: 0.416
+note f1: 0.431
+note f1: 0.415
+note f1: 0.364
+note f1: 0.403
+note f1: 0.218
+note f1: 0.545
+note f1: 0.333
+note f1: 0.684
+note f1: 0.590
+note f1: 0.545
+note f1: 0.467
+note f1: 0.579
+note f1: 0.549
+note f1: 0.427
+note f1: 0.503
+note f1: 0.450
+note f1: 0.516
+note f1: 0.673
+note f1: 0.180
+note f1: 0.483
+note f1: 0.461
+note f1: 0.571
+note f1: 0.485
+note f1: 0.522
+note f1: 0.539
+note f1: 0.719
+note f1: 0.467
+note f1: 0.570
+note f1: 0.428
+note f1: 0.505
+note f1: 0.590
+note f1: 0.572
+note f1: 0.521
+note f1: 0.324
+note f1: 0.485
+note f1: 0.593
+note f1: 0.478
+note f1: 0.418
+note f1: 0.523
+note f1: 0.456
+note f1: 0.528
+note f1: 0.454
+note f1: 0.415
+Time: 56.397
+frame_precision: 0.7886
+frame_recall: 0.8024
+frame_f1: 0.7931
+note_prcision: 0.4781
+note_recall: 0.4727
+note_f1: 0.4749

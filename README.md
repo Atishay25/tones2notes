@@ -38,5 +38,14 @@ Found 3 possible good datasets for Music Transcription -
 
 ### Status
 
+
+
+
 - In v2 folder, starting with new implementation of Main
 - Go through the paper
+
+
+https://github.com/Atishay25/tones2notes/assets/110190084/48c37086-663a-475c-84c1-47769e38a464
+
+
+

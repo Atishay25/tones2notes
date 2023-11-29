@@ -1,18 +1,12 @@
 import os
 import logging
-import h5py
-import soundfile
 import librosa
 import audioread
 import numpy as np
-import pandas as pd
-import csv
 import datetime
-import collections
 import pickle
 import config
 from mido import MidiFile
-import soundfile as sf
 
 def create_folder(fd):
     if not os.path.exists(fd):
@@ -176,7 +170,8 @@ class TargetProcessor(object):
             for t in range(locts[-1], len(input)):
                 output[t] = step * (t - locts[-1]) - input[locts[-1]]
 
-        output = np.clip(np.abs(output), 0., 0.05) * 20
+        output = np.clip(np.abs(output), 0., 0.05) * 20         # J = 0.05 here 
+        #output = np.clip(np.abs(output), 0., 0.02) * 50
         output = (1. - output)
 
         return output
@@ -282,8 +277,8 @@ def plot_waveform_midi_targets(data_dict, start_time, note_events):
     fig, axs = plt.subplots(8, 1, sharex=True, figsize=(30, 30))
     fontsize = 20
     axs[0].matshow(np.log(x), origin='lower', aspect='auto', cmap='jet')
-    axs[1].matshow(data_dict['onset_roll'].T, origin='lower', aspect='auto', cmap='jet')
-    axs[2].matshow(data_dict['offset_roll'].T, origin='lower', aspect='auto', cmap='jet')
+    axs[1].matshow(data_dict['onset_roll'].T, origin='lower', aspect='auto')
+    axs[2].matshow(data_dict['offset_roll'].T, origin='lower', aspect='auto')
     axs[3].matshow(data_dict['reg_onset_roll'].T, origin='lower', aspect='auto', cmap='jet')
     axs[4].matshow(data_dict['reg_offset_roll'].T, origin='lower', aspect='auto', cmap='jet')
     axs[5].matshow(data_dict['frame_roll'].T, origin='lower', aspect='auto', cmap='jet')

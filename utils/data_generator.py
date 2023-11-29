@@ -1,21 +1,16 @@
 import os
-import sys
 import numpy as np
 import h5py
-import csv
-import time
-import collections
 import librosa
 import logging
-
-from processing import (traverse_folder, TargetProcessor, write_events_to_midi, 
-    plot_waveform_midi_targets)
+from processing import traverse_folder, TargetProcessor, plot_waveform_midi_targets
 import config
 
-
+# Class to be used by Dataloader
+# Takes audio + midi features from .h5 files of each audio segment as input
+# Returns the waveform (X) and targets (y) for each audio segment
 class MapsDataset(object):
-    def __init__(self, hdf5s_dir, segment_seconds, frames_per_second, 
-        max_note_shift=0, augmentor=None):
+    def __init__(self, hdf5s_dir, segment_seconds, frames_per_second, max_note_shift=0):
         """This class takes the meta of an audio segment as input, and return 
         the waveform and targets of the audio segment. This class is used by 
         DataLoader. 
@@ -35,7 +30,6 @@ class MapsDataset(object):
         self.begin_note = config.begin_note
         self.classes_num = config.classes_num
         self.segment_samples = int(self.sample_rate * self.segment_seconds)
-        self.augmentor = augmentor
 
         self.random_state = np.random.RandomState(42)
 
@@ -106,7 +100,6 @@ class MapsDataset(object):
         debugging = False
         if debugging:
             plot_waveform_midi_targets(data_dict, start_time, note_events)
-            exit()
 
         return data_dict
 

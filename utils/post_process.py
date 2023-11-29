@@ -7,7 +7,7 @@ import mir_eval
 from sklearn import metrics
 from concurrent.futures import ProcessPoolExecutor
 
-from processing import (get_filename, traverse_folder, onsets_frames_note_detection)
+from processing import get_filename, traverse_folder, onsets_frames_note_detection
 
 class OnsetsFramesPostProcessor(object):
     def __init__(self, frames_per_second, classes_num):
@@ -481,10 +481,9 @@ class ScoreCalculator(object):
             with h5py.File(hdf5_path, 'r') as hf:
                 if hf.attrs['split'].decode() == self.split:
                     list_args.append([n, hdf5_path, params])
-
         with ProcessPoolExecutor() as executor:
             results = executor.map(self.calculate_score_per_song, list_args)
-
+      
         stats_list = list(results)
         stats_dict = {}
         for key in stats_list[0].keys():
@@ -501,7 +500,6 @@ class ScoreCalculator(object):
 
         prob_path = os.path.join(self.probs_dir, '{}.pkl'.format(get_filename(hdf5_path)))
         total_dict = pickle.load(open(prob_path, 'rb'))
-
         ref_on_off_pairs = total_dict['ref_on_off_pairs']
         ref_midi_notes = total_dict['ref_midi_notes']
         output_dict = total_dict
@@ -523,7 +521,7 @@ class ScoreCalculator(object):
                 classes_num=self.classes_num, onset_threshold=onset_threshold,
                 offset_threshold=offset_threshold, frame_threshold=frame_threshold)
         
-        elif self.post_processor_type == 'onsets_framse':
+        elif self.post_processor_type == 'onsets_frames':
             post_processor = OnsetsFramesPostProcessor(self.frames_per_second, classes_num=self.classes_num)
 
         
@@ -544,7 +542,7 @@ class ScoreCalculator(object):
                        est_velocities=est_vels,
                        onset_tolerance=self.onset_tolerance, 
                        offset_ratio=self.offset_ratio, 
-                       offset_min_tolerance=self.offset_min_tolerance ))
+                       offset_min_tolerance=self.offset_min_tolerance))
         else:
             (note_precision, note_recall, note_f1, _) = \
                 mir_eval.transcription.precision_recall_f1_overlap(

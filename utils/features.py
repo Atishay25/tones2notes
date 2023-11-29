@@ -1,8 +1,6 @@
 import numpy as np
-import csv
 import os
 import h5py
-import time
 import config
 import librosa
 import argparse
@@ -84,11 +82,7 @@ def pack_maps(args):
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='')
-
     parser.add_argument('--dir', type=str, required=True, help='Directory of dataset.')
     parser.add_argument('--workspace', type=str, required=True, help='Directory of your workspace.')
-
-    # Parse arguments
     args = parser.parse_args()
-
     pack_maps(args)

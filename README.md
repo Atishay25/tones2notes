@@ -31,10 +31,10 @@ Found 3 possible good datasets for Music Transcription -
 - Main's simpler version : https://github.com/qiuqiangkong/music_transcription_MAPS
 - Main paper which we are implementing is [this](https://github.com/bytedance/piano_transcription/blob/master/paper/High-resolution%20Piano%20Transcription%20with%20Pedals%20by%20Regressing%20Precise%20Onsets%20and%20Offsets%20Times_v0.2.pdf)
 
-https://github.com/Atishay25/tones2notes/assets/110190084/48c37086-663a-475c-84c1-47769e38a464
-
 ## Transcription Results
 - L theme from Death Note. The Original music is [this](https://www.youtube.com/watch?v=qR6dzwQahOM)
-    https://github.com/Atishay25/tones2notes/assets/96432271/b5e7aff0-c105-4a3c-9cbd-6c6b0d84c3a7
-- Another song
 
+    https://github.com/Atishay25/tones2notes/assets/96432271/b5e7aff0-c105-4a3c-9cbd-6c6b0d84c3a7
+- A piece from Aajkal tere mere pyar ke charche song. The original audio is [this](./samples/aajkal.wav), played in Accordion
+
+    https://github.com/Atishay25/tones2notes/assets/96432271/8195f423-b3b0-47f2-aafe-7de3f990cc50

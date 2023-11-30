@@ -1,6 +1,5 @@
 import numpy as np
 from sklearn import metrics
-
 from pytorch_utils import forward_dataloader
 
 # Mean Absolute Error 
@@ -15,31 +14,12 @@ def mae(target, output, mask):
 # Evaluate each segment based on metrics 
 class SegmentEvaluator(object):
     def __init__(self, model, batch_size):
-        """Evaluate segment-wise metrics.
-        Args:
-          model: object
-          batch_size: int
-        """
         self.model = model
         self.batch_size = batch_size
 
     def evaluate(self, dataloader):
-        """Evaluate over a few mini-batches.
-
-        Args:
-          dataloader: object, used to generate mini-batches for evaluation.
-
-        Returns:
-          statistics: dict, e.g. {
-            'frame_f1': 0.800, 
-            (if exist) 'onset_f1': 0.500, 
-            (if exist) 'offset_f1': 0.300, 
-            ...}
-        """
-
         statistics = {}
         output_dict = forward_dataloader(self.model, dataloader, self.batch_size)
-        
         # Frame and onset evaluation
         if 'frame_output' in output_dict.keys():
             statistics['frame_ap'] = metrics.average_precision_score(
@@ -56,24 +36,19 @@ class SegmentEvaluator(object):
                 output_dict['offset_roll'].flatten(), 
                 output_dict['offset_output'].flatten(), average='macro')
 
-        if 'reg_onset_output' in output_dict.keys():
-            """Mask indictes only evaluate where either prediction or ground truth exists"""
+        if 'reg_onset_output' in output_dict.keys():        # mask takes those indices where any one of them is nonzero
             mask = (np.sign(output_dict['reg_onset_output'] + output_dict['reg_onset_roll'] - 0.01) + 1) / 2
             statistics['reg_onset_mae'] = mae(output_dict['reg_onset_output'], 
                 output_dict['reg_onset_roll'], mask)
 
         if 'reg_offset_output' in output_dict.keys():
-            """Mask indictes only evaluate where either prediction or ground truth exists"""
             mask = (np.sign(output_dict['reg_offset_output'] + output_dict['reg_offset_roll'] - 0.01) + 1) / 2
             statistics['reg_offset_mae'] = mae(output_dict['reg_offset_output'], 
                 output_dict['reg_offset_roll'], mask)
 
         if 'velocity_output' in output_dict.keys():
-            """Mask indictes only evaluate where onset exists"""
-            statistics['velocity_mae'] = mae(output_dict['velocity_output'], 
-                output_dict['velocity_roll'] / 128, output_dict['onset_roll'])
-
+            statistics['velocity_mae'] = mae(output_dict['velocity_output'], output_dict['velocity_roll'] / 128, output_dict['onset_roll'])
+            
         for key in statistics.keys():
             statistics[key] = np.around(statistics[key], decimals=4)
-
         return statistics

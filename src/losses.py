@@ -1,8 +1,5 @@
 import torch
 
-# Loss function to be used during Training
-
-
 # Binary Cross Entropy Loss
 # wherever mask is 0, those indices won't be taken
 def bce(output, target, mask):

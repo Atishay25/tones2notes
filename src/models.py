@@ -194,16 +194,13 @@ class CRNN_Conditioning(nn.Module):
             amin=amin, top_db=top_db, freeze_parameters=True)
         
         self.bn0 = nn.BatchNorm2d(mel_bins, momentum)
-
         self.frame_model =      AcousticModel(classes_num, midfeat, momentum)
         self.reg_onset_model =  AcousticModel(classes_num, midfeat, momentum)
         self.reg_offset_model = AcousticModel(classes_num, midfeat, momentum)
         self.velocity_model =   AcousticModel(classes_num, midfeat, momentum)
-
         self.reg_onset_gru = nn.GRU(input_size=88 * 2, hidden_size=256, num_layers=1, 
             bias=True, batch_first=True, dropout=0., bidirectional=True)
         self.reg_onset_fc = nn.Linear(512, classes_num, bias=True)
-
         self.frame_gru = nn.GRU(input_size=88 * 3, hidden_size=256, num_layers=1, 
             bias=True, batch_first=True, dropout=0., bidirectional=True)
         self.frame_fc = nn.Linear(512, classes_num, bias=True)
@@ -241,7 +238,7 @@ class CRNN_Conditioning(nn.Module):
 
         return output_dict
 
-# Removed conditioning
+# CRNN Model (uses GRU)
 class CRNN(nn.Module):
     def __init__(self, frames_per_second, classes_num):
         super(CRNN, self).__init__()
@@ -297,7 +294,7 @@ class CRNN(nn.Module):
             'velocity_output': velocity_output}
         return output_dict
     
-# Removed Conditioning and uing Acoustic Model without GRU
+# Concurrent Convolutional Neural Network
 class CCNN(nn.Module):
     def __init__(self, frames_per_second, classes_num):
         super(CCNN, self).__init__()
@@ -345,7 +342,6 @@ class CCNN(nn.Module):
         reg_onset_output = self.reg_onset_model(x)  # (batch_size, time_steps, classes_num)
         reg_offset_output = self.reg_offset_model(x)    # (batch_size, time_steps, classes_num)
         velocity_output = self.velocity_model(x)    # (batch_size, time_steps, classes_num)
-
         output_dict = {
             'reg_onset_output': reg_onset_output, 
             'reg_offset_output': reg_offset_output, 

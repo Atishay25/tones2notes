@@ -4,7 +4,7 @@ Automatic Music Transcription (AMT) refers to the task of transcribing a given a
 
 
 ## Instructions
-- We used the MAPS dataset for training and evaluating the model, which can be downloaded from [here](https://amubox.univ-amu.fr/index.php/s/iNG0xc5Td1Nv4rR). Download the data and store it in `data/MAPS` folder
+- We used the MAPS dataset for training and evaluating the model, which can be downloaded from [here](https://amubox.univ-amu.fr/index.php/s/iNG0xc5Td1Nv4rR). After downloading it, store it in `data/MAPS` directory
 - Loading the dataset, splitting it and storing in .h5 binaries -
     ```
     python3 features.py --dir data/MAPS --workspace $(pwd)
@@ -30,15 +30,15 @@ Automatic Music Transcription (AMT) refers to the task of transcribing a given a
 
 
 ## Transcription Results
+
+- Piano Roll Comparison for an audio from MAPS Test dataset
+    ![Piano Roll](./results/maps_piano_roll.png)
 - L theme from Death Note. The Original music is [this](https://www.youtube.com/watch?v=qR6dzwQahOM)
 
     https://github.com/Atishay25/tones2notes/assets/96432271/b5e7aff0-c105-4a3c-9cbd-6c6b0d84c3a7
 - A piece from Aajkal tere mere pyar ke charche song. The original audio is [this](./samples/aajkal.wav), played in Accordion
 
     https://github.com/Atishay25/tones2notes/assets/96432271/8195f423-b3b0-47f2-aafe-7de3f990cc50
-
-- Piano Roll Comparison for an audio from MAPS Test dataset
-    ![Piano Roll](./results/maps_piano_roll.png)
 
 
 ### References

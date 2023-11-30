@@ -15,11 +15,9 @@ midiFile =  audioFile.split('.')[0] + '_transcipted.mid'
 videoFile = audioFile.split('.')[0] + '_transcripted.mp4'
 vf = os.path.join(Path.cwd(), 'results', videoFile)
 
-tc = PianoTranscription('CCNN', device='cuda', checkpoint_path='./model_checkpoints/CRNN_Conditioning_regressedLoss.pth')
+tc = PianoTranscription('CRNN_Conditioning', device='cuda', checkpoint_path='./model_checkpoints/CRNN_Conditioning_regressedLoss.pth')
 audio, _ = librosa.core.load(args.audio_file, sr=16000)
 tc.transcribe(audio, midiFile)
 create_video(input_midi=midiFile, video_filename=vf)
 print(f"Created Video of size {os.path.getsize(vf)} bytes at path {vf}")
 print(Path(vf))
-
-

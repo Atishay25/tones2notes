@@ -5,6 +5,10 @@ Automatic Music Transcription (AMT) refers to the task of transcribing a given a
 
 ## Running Instructions
 - The dataset used is MAPS, which can be downloaded from [here](https://amubox.univ-amu.fr/index.php/s/iNG0xc5Td1Nv4rR). After downloading it, store it in `data/MAPS` directory
+- Install the required python packages by 
+    ```
+    pip install -r requirements. txt 
+    ```
 - Loading the dataset, splitting it and storing in .h5 binaries -
     ```
     python3 features.py --dir data/MAPS --workspace $(pwd)

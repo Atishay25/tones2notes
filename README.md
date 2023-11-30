@@ -3,8 +3,8 @@
 Automatic Music Transcription (AMT) refers to the task of transcribing a given audio into symbolic representations (musical notes or MIDI). In this project, the goal is to transcribe musical recordings into music note events with pitch, onset, offset, and velocity. It is a challenging task due to the high polyphony of music pieces and requires appropriate data processing for audio files. We have implemented and evaluated Deep Learning models for music transcription. The architectural design of models and data processing techniques are based on [this](https://arxiv.org/pdf/2010.01815.pdf) paper. 
 
 
-## Instructions
-- We used the MAPS dataset for training and evaluating the model, which can be downloaded from [here](https://amubox.univ-amu.fr/index.php/s/iNG0xc5Td1Nv4rR). After downloading it, store it in `data/MAPS` directory
+## Running Instructions
+- The dataset used is MAPS, which can be downloaded from [here](https://amubox.univ-amu.fr/index.php/s/iNG0xc5Td1Nv4rR). After downloading it, store it in `data/MAPS` directory
 - Loading the dataset, splitting it and storing in .h5 binaries -
     ```
     python3 features.py --dir data/MAPS --workspace $(pwd)
@@ -22,11 +22,12 @@ Automatic Music Transcription (AMT) refers to the task of transcribing a given a
     ```
     python3 src/results.py calculate_metrics --model_type='CRNN_Condidioning' --dataset='maps' --split='test' --post_processor_type='regression' --workspace=$WORKSPACE 
     ```
-- **For transcribing any given audio**
-    ```
-    python3 src/transcribe_and_play.py --audio_file <name of audio file .wav or .mp3>
-    ```
-    It will transcribe the given audio using the best checkpoint model into MIDI, genrate the MIDI file and also generate a video using [synthviz](https://pypi.org/project/synthviz/) library corresponding to MIDI transcripted
+Also, there are some result plots present in `notebooks/plots.ipynb` and piano roll with MIDI notes of a transcripted audio present in `transcription_plots.ipynb`
+## For transcribing a given audio
+```
+python3 src/transcribe_and_play.py --audio_file <name of audio file>
+```
+It will transcribe the given audio using the best checkpoint model into MIDI, generate the MIDI file and also generate a video using [synthviz](https://pypi.org/project/synthviz/) library corresponding to the MIDI, displaying the notes played. Note that transcription requires `ffmpeg` backend and therefore does not work on gpu1.cse.iitb.ac.in, unless you install it with sudo permissions
 
 
 ## Transcription Results
@@ -36,7 +37,7 @@ Automatic Music Transcription (AMT) refers to the task of transcribing a given a
 - L theme from Death Note. The Original music is [this](https://www.youtube.com/watch?v=qR6dzwQahOM)
 
     https://github.com/Atishay25/tones2notes/assets/96432271/b5e7aff0-c105-4a3c-9cbd-6c6b0d84c3a7
-- A piece from Aajkal tere mere pyar ke charche song. The original audio is [this](./samples/aajkal.wav), played in Accordion
+- A musical piece from Aajkal tere mere pyar ke charche in Accordion. The original audio is [this](https://iitbacin-my.sharepoint.com/:u:/g/personal/210050026_iitb_ac_in/EYGvs6tPXKVMosWJ437BEuABmMQxtsDqO5geySFfj6IiIQ?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0RpcmVjdCJ9fQ&e=uciCdn)
 
     https://github.com/Atishay25/tones2notes/assets/96432271/8195f423-b3b0-47f2-aafe-7de3f990cc50
 

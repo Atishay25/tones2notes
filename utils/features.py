@@ -4,17 +4,16 @@ import h5py
 import config
 import librosa
 import argparse
-
 from processing import read_maps_midi
 from sklearn.model_selection import train_test_split
 
+# Read MAPS dataset and store it into .h5 files
 def pack_maps(args):
     dir = args.dir
     sample_rate = config.sample_rate
-    pianos_train = ['AkPnBcht','AkPnCGdD','SptkBGCl','AkPnBsdf','AkPnStgb','SptkBGAm','StbgTGd2']
-    pianos_test =  ['ENSTDkCl', 'ENSTDkAm']
+    pianos_train = ['AkPnBcht','AkPnCGdD','SptkBGCl','AkPnBsdf','AkPnStgb','SptkBGAm','StbgTGd2']       # Train + Validation set
+    pianos_test =  ['ENSTDkCl', 'ENSTDkAm']         # Test set
     workspace = args.workspace
-
     hdf5s_dir = os.path.join(workspace, 'hdf5s', 'maps')
     count = 0
     train_data = []
@@ -23,9 +22,7 @@ def pack_maps(args):
         audio_names = [os.path.splitext(name)[0] for name in os.listdir(sub_dir) if os.path.splitext(name)[-1] == '.mid']
         for audio_name in audio_names:
             train_data.append((p, audio_name))
-            
-
-    audio_train, audio_val = train_test_split(train_data, test_size=0.2, random_state=42)
+    audio_train, audio_val = train_test_split(train_data, test_size=0.2, random_state=42)           # splitting training data
     for audio_name in audio_train+audio_val:
         sub_dir = os.path.join(dir, audio_name[0], 'MUS')
         audio_path = '{}.wav'.format(os.path.join(sub_dir, audio_name[1]))
@@ -65,7 +62,6 @@ def pack_maps(args):
             packed_dir_name = os.path.dirname(packed_hdf5_path)
             if not os.path.exists(packed_dir_name):
                 os.makedirs(packed_dir_name)
-
             split = 'test'
             print(count, audio_name, split)
             with h5py.File(packed_hdf5_path, 'w') as hf:
@@ -80,7 +76,6 @@ def pack_maps(args):
 
 
 if __name__ == '__main__':
-    
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--dir', type=str, required=True, help='Directory of dataset.')
     parser.add_argument('--workspace', type=str, required=True, help='Directory of your workspace.')

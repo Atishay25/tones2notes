@@ -20,14 +20,14 @@ Automatic Music Transcription (AMT) refers to the task of transcribing a given a
     We have implemented 3 models, choose the `model_type` among ['CRNN', 'CCNN', 'CRNN_Conditioning']. Also, there are 2 loss functions available (regressed and non-regressed). Refer to the comments in `run.sh` for more info. The trained model will be stored at checkpoints in `checkpoints` folder with training stats in `statistics` folder
 - Infering the output probabilities on Test dataset and storing them in `probs` folder
     ```
-    python3 src/results.py infer_prob --model_type='CRNN_Condidioning' --checkpoint_path=$CHECKPOINT_PATH --dataset='maps' --split='test' --post_processor_type='regression'  --workspace=$WORKSPACE --cuda 
+    python3 src/results.py infer_prob --model_type='CRNN_Conditioning' --checkpoint_path=$CHECKPOINT_PATH --dataset='maps' --split='test' --post_processor_type='regression'  --workspace=$WORKSPACE --cuda 
     ```
 - Evaluating the Test dataset 
     ```
-    python3 src/results.py calculate_metrics --model_type='CRNN_Condidioning' --dataset='maps' --split='test' --post_processor_type='regression' --workspace=$WORKSPACE 
+    python3 src/results.py calculate_metrics --model_type='CRNN_Conditioning' --dataset='maps' --split='test' --post_processor_type='regression' --workspace=$WORKSPACE 
     ```
 Also, there are some result plots present in `notebooks/plots.ipynb` and piano roll with MIDI notes of a transcripted audio present in `transcription_plots.ipynb`
-## For transcribing a given audio
+## For Transcribing a given Audio
 ```
 python3 src/transcribe_and_play.py --audio_file <name of audio file>
 ```
@@ -38,6 +38,8 @@ It will transcribe the given audio using the best checkpoint model into MIDI, ge
 
 - Piano Roll Comparison for an audio from MAPS Test dataset
     ![Piano Roll](./results/maps_piano_roll.png)
+- Piano Roll of L theme
+    ![Piano Roll](./results/L_theme_piano_roll.png)
 - L theme from Death Note. The Original music is [this](https://www.youtube.com/watch?v=qR6dzwQahOM)
 
     https://github.com/Atishay25/tones2notes/assets/96432271/b5e7aff0-c105-4a3c-9cbd-6c6b0d84c3a7
@@ -46,7 +48,7 @@ It will transcribe the given audio using the best checkpoint model into MIDI, ge
     https://github.com/Atishay25/tones2notes/assets/96432271/8195f423-b3b0-47f2-aafe-7de3f990cc50
 
 
-### References
+## References
 
 - Qiuqiang Kong, Bochen Li, Xuchen Song, Yuan Wan, and Yuxuan Wang. ”High-resolution Piano Transcription with Pedals by Regressing Onsets and Offsets Times.” arXiv preprint arXiv:2010.01815 (2020).
 - [bytedance](https://github.com/bytedance/piano_transcription) and [kong's](https://github.com/qiuqiangkong/music_transcription_MAPS) repositories for data processing technique's and model architecture

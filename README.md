@@ -38,15 +38,20 @@ It will transcribe the given audio using the best checkpoint model into MIDI, ge
 
 - Piano Roll Comparison for an audio from MAPS Test dataset
     ![Piano Roll](./results/maps_piano_roll.png)
-- Piano Roll of L theme
+- Piano Roll of L theme (Death Note)
     ![Piano Roll](./results/L_theme_piano_roll.png)
-- L theme from Death Note. The Original music is [this](https://www.youtube.com/watch?v=qR6dzwQahOM)
+- Fur elise. The original music is [this](https://iitbacin-my.sharepoint.com/:u:/g/personal/210050026_iitb_ac_in/Eb3wFnBxks1Ktf0Lubr5zjsBPbInoPKE9HHKohwhm-XOvw?e=Exf9aH&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D)
+  
+    https://github.com/Atishay25/tones2notes/assets/96432271/7ee9ac39-4b76-46d7-ba91-4be7db7dfb3d
+- L theme (Death Note). The Original music is [this](https://www.youtube.com/watch?v=qR6dzwQahOM)
 
     https://github.com/Atishay25/tones2notes/assets/96432271/b5e7aff0-c105-4a3c-9cbd-6c6b0d84c3a7
+- Nezuko Theme (Demon Slayer). The original music is [this](https://iitbacin-my.sharepoint.com/:u:/g/personal/210050026_iitb_ac_in/EaWBDoJrKDVEjRnYUKqeOpYBAlQ6bsyHazW6lyfAwtEvkg?e=ZcBZxe&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D)
+
+    https://github.com/Atishay25/tones2notes/assets/96432271/81917f67-219d-4060-b510-206697bae0b9
 - A musical piece from Aajkal tere mere pyar ke charche in Accordion. The original audio is [this](https://iitbacin-my.sharepoint.com/:u:/g/personal/210050026_iitb_ac_in/EYGvs6tPXKVMosWJ437BEuABmMQxtsDqO5geySFfj6IiIQ?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0RpcmVjdCJ9fQ&e=uciCdn)
 
     https://github.com/Atishay25/tones2notes/assets/96432271/8195f423-b3b0-47f2-aafe-7de3f990cc50
-
 
 ## References
 

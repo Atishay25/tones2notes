@@ -52,6 +52,9 @@ It will transcribe the given audio using the best checkpoint model into MIDI, ge
 - A musical piece from Aajkal tere mere pyar ke charche in Accordion. The original audio is [this](https://iitbacin-my.sharepoint.com/:u:/g/personal/210050026_iitb_ac_in/EYGvs6tPXKVMosWJ437BEuABmMQxtsDqO5geySFfj6IiIQ?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0RpcmVjdCJ9fQ&e=uciCdn)
 
     https://github.com/Atishay25/tones2notes/assets/96432271/8195f423-b3b0-47f2-aafe-7de3f990cc50
+- [Nagin](https://iitbacin-my.sharepoint.com/:u:/g/personal/210050026_iitb_ac_in/EQP27s5he2FDmGi1vHTLsQgBYDi9Uu-ar54doOQ3o4_SQA?e=eLuLqX&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D). Notice that there is a lot of noise due to multiple instruments being played together (polyphonic music)
+
+    https://github.com/Atishay25/tones2notes/assets/96432271/f3c7cf77-ebaa-45f1-b247-e9ed5d1080d7
 
 ## References
 
